@@ -49,6 +49,10 @@ config.log = require('noogger').init(log_params);
 config.horizon = new StellarSdk.Server(config.horizon_url);
 
 config.riak_options = {
+    // auth: {
+    //     user: 'ihor',
+    //     pass: '123123'
+    // },
     default_bucket_type: 'default',
     store: {
         bucket_name: 'merchantstores',
@@ -66,10 +70,7 @@ config.statuses = {
     STATUS_SUCCESS: 5
 };
 
-var Riak = require('basho-riak-client');
-
-var riakNodes = ['riak.smartmoney.com.ua'];
-config.riak = new Riak.Client(riakNodes);
+config.riak_nodes = ['riak.smartmoney.com.ua'];
 
 module.exports = config;
 

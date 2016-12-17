@@ -7,7 +7,7 @@ var Helpers = {
     encodeRiakData: function (object) {
         return JSON.stringify(object);
     },
-    getObjectByBucketAndID: function(bucket, id) {
+    getObjectByBucketAndID: function(bucket, id, riak) {
         var fetchOptions = {
             bucketType: Conf.riak_options.default_bucket_type,
             bucket: bucket,
@@ -15,7 +15,7 @@ var Helpers = {
         };
 
         return new Promise(function (resolve, reject) {
-            Conf.riak.fetchValue(fetchOptions, function (err, rslt) {
+            riak.fetchValue(fetchOptions, function (err, rslt) {
                 if (err) {
                     Conf.log.error('Error while trying get object from bucket [' + bucket + '] with id [' + id + ']. Details below');
                     Conf.log.error(err);
@@ -28,11 +28,11 @@ var Helpers = {
             });
         });
     },
-    updateRiakObject: function(riakObj, data) {
+    updateRiakObject: function(riakObj, data, riak) {
         riakObj.setValue(Helpers.encodeRiakData(data));
 
         return new Promise(function (resolve, reject) {
-            Conf.riak.storeValue({ value: riakObj }, function (err, rslt) {
+            riak.storeValue({ value: riakObj }, function (err, rslt) {
                 if (err) {
                     reject(err);
                 }

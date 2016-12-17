@@ -2,17 +2,17 @@ var Conf    = require('../config'),
     Helpers = require('./Helpers'),
     Sender  = require('./Sender');
 
-var Handler = (transaction) => {
+var Handler = (transaction, riak) => {
     var order_id = getMerchantOrderIDFromMemo(transaction.memo);
     if (!order_id) {
         return false;
     }
     var riak_order_obj = false;
-    var order_data   = false;
-    var payment_data = false;
-    var store_data   = false;
+    var order_data     = false;
+    var payment_data   = false;
+    var store_data     = false;
 
-    Helpers.getObjectByBucketAndID(Conf.riak_options.order.bucket_name, order_id)
+    Helpers.getObjectByBucketAndID(Conf.riak_options.order.bucket_name, order_id, riak)
         .then(function(object) {
             riak_order_obj = object;
             order_data = Helpers.decodeRiakData(riak_order_obj.value);
@@ -42,7 +42,7 @@ var Handler = (transaction) => {
             if (typeof payment_data.amount == 'undefined' || !payment_data.amount) {
                 return Promise.reject();
             }
-            return Helpers.getObjectByBucketAndID(Conf.riak_options.store.bucket_name, order_data.store_id)
+            return Helpers.getObjectByBucketAndID(Conf.riak_options.store.bucket_name, order_data.store_id, riak)
         })
         .then(function(object){
             //check receiver details from payment data
@@ -64,7 +64,7 @@ var Handler = (transaction) => {
                 //set tx status to partial payment
                 order_data.status = Conf.statuses.STATUS_PARTIAL_PAYMENT;
             }
-            return Helpers.updateRiakObject(riak_order_obj, order_data);
+            return Helpers.updateRiakObject(riak_order_obj, order_data, riak);
         })
         .then(function(result){
             //TODO: check if result is success
