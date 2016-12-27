@@ -16,10 +16,10 @@ var Handler = (transaction, riak) => {
         .then(function(object) {
             riak_order_obj = object;
             order_data = Helpers.decodeRiakData(riak_order_obj.value);
-            if (!order_data || typeof order_data.status == 'undefined' || typeof order_data.store_id == 'undefined') {
+            if (!order_data || typeof order_data.status_i == 'undefined' || typeof order_data.store_id_s == 'undefined') {
                 return Promise.reject('Order with id [' + order_id + '] has bad structure')
             }
-            if (order_data.status != Conf.statuses.STATUS_WAIT_PAYMENT) {
+            if (order_data.status_i != Conf.statuses.STATUS_WAIT_PAYMENT) {
                 return Promise.reject('Order with id [' + order_id + '] has been already handled');
             }
             return getPaymentFromTX(transaction.id);
@@ -42,12 +42,12 @@ var Handler = (transaction, riak) => {
             if (typeof payment_data.amount == 'undefined' || !payment_data.amount) {
                 return Promise.reject();
             }
-            return Helpers.getObjectByBucketAndID(Conf.riak_options.store.bucket_name, order_data.store_id, riak)
+            return Helpers.getObjectByBucketAndID(Conf.riak_options.store.bucket_name, order_data.store_id_s, riak)
         })
         .then(function(object){
             //check receiver details from payment data
             store_data = Helpers.decodeRiakData(object.value);
-            if (store_data.merchant_id != payment_data.to) {
+            if (store_data.merchant_id_s != payment_data.to) {
                 return Promise.reject('Transaction with id [' + transaction.id + '] has correct memo but incorrect receiver. Its may be try of hack');
             }
         })
@@ -57,18 +57,18 @@ var Handler = (transaction, riak) => {
             order_data.payment_date   = Math.floor(Date.now() / 1000);
             order_data.payer          = payment_data.from;
             order_data.tx             = transaction.id;
-            if (parseFloat(payment_data.amount) >= parseFloat(order_data.amount)) {
+            if (parseFloat(payment_data.amount) >= parseFloat(order_data.amount_f)) {
                 //payment complete in full size, set tx status to success
-                order_data.status = Conf.statuses.STATUS_WAIT_ANSWER;
+                order_data.status_i = Conf.statuses.STATUS_WAIT_ANSWER;
             } else {
                 //set tx status to partial payment
-                order_data.status = Conf.statuses.STATUS_PARTIAL_PAYMENT;
+                order_data.status_i = Conf.statuses.STATUS_PARTIAL_PAYMENT;
             }
             return Helpers.updateRiakObject(riak_order_obj, order_data, riak);
         })
         .then(function(result){
             //TODO: check if result is success
-            return Sender(order_data);
+            return Sender(order_data, riak);
         })
         .catch(function(err){
             if(err){

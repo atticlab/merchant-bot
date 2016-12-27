@@ -2,7 +2,7 @@ var StellarSdk = require('stellar-sdk');
 
 var config = {};
 
-config.horizon_url = 'http://blockchain.smartmoney.com.ua:80';
+config.horizon_url = process.env.HORIZON_HOST;
 
 config.order = {
     order_prefix: "mo:"
@@ -70,7 +70,7 @@ config.statuses = {
     STATUS_SUCCESS: 5
 };
 
-config.riak_nodes = ['riak.smartmoney.com.ua'];
+config.riak_nodes = [process.env.RIAK_HOST];
 
 module.exports = config;
 

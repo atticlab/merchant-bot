@@ -1,5 +1,6 @@
 var Handler = require('./inc/Handler');
 var Conf = require('./config');
+var prompt = require('prompt');
 var Riak = require('basho-riak-client');
 
 var riak_client = null;

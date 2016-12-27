@@ -11,11 +11,15 @@ list:
 #############################
 
 stop:
-	docker stop /smartmoney/merchant_bot
+	docker-compose stop
 
 build:
-	docker build -t smartmoney/merchant_bot .
-	docker run --restart=always -it smartmoney/merchant_bot
+	@if [ ! -f ./.env ]; then\
+  	read -p "Enter riak host (domain only):" riak_host; echo "RIAK_HOST=$$riak_host" >> ./.env; \
+  	read -p "Enter horizon host (with protocol and port):" horizon_host; echo "HORIZON_HOST=$$horizon_host" >> ./.env; \
+	fi
+	docker-compose build
+	docker-compose up -d
 
 attach:
 	docker exec -i -t ${c} /bin/bash
