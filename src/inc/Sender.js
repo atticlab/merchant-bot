@@ -23,7 +23,7 @@ var Sender = (order, riak) => {
                 }
                 //up status to STATUS_SUCCESS
                 order_data.status_i = Conf.statuses.STATUS_SUCCESS;
-                Helpers.updateRiakObject(riak_object, order_data, riak);
+                Helpers.updateRiakObject(riak_object, order_data, riak, /* close connection */ true);
             });
             if (order_data.status_i != Conf.statuses.STATUS_WAIT_ANSWER) {
                 return false;

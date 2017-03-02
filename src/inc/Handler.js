@@ -3,10 +3,8 @@ var Conf    = require('../config'),
     Sender  = require('./Sender');
 
 var Handler = (transaction, riak) => {
-    var order_id = getMerchantOrderIDFromMemo(transaction.memo);
-    if (!order_id) {
-        return false;
-    }
+    var order_id = Helpers.getMerchantOrderIDFromMemo(transaction.memo);
+    Conf.log.info('Handling order: ' + order_id);
     var riak_order_obj = false;
     var order_data     = false;
     var payment_data   = false;
@@ -81,25 +79,6 @@ function getPaymentFromTX(transaction_id) {
     return Conf.horizon.payments()
         .forTransaction(transaction_id)
         .call();
-}
-
-function getMerchantOrderIDFromMemo(memo) {
-    if (typeof memo == 'undefined') {
-        return false;
-    }
-    if (memo.length <= Conf.order.order_prefix.length) {
-        return false;
-    }
-    // if (memo.length != 14) {
-    //     return false;
-    // }
-    var prefix   = memo.substr(0, Conf.order.order_prefix.length);
-    var order_id = memo.substr(Conf.order.order_prefix.length);
-    if (prefix != Conf.order.order_prefix || !order_id) {
-        return false;
-    }
-
-    return order_id;
 }
 
 module.exports = Handler;
